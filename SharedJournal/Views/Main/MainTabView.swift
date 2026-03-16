@@ -22,7 +22,7 @@ struct MainTabView: View {
                     Text("Home")
                 }
 
-            Text("Friends")
+            FriendsListView()
                 .tabItem {
                     Image(systemName: "person.2.fill")
                     Text("Friends")

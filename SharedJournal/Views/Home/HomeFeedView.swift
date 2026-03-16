@@ -292,7 +292,7 @@ struct HomeFeedView: View {
             let loadedMemories: [Memory] = try await SupabaseManager.shared
                 .from("memories")
                 .select()
-                .in("friendship_id", value: friendshipIds)
+                .in("friendship_id", values: friendshipIds)
                 .order("memory_date", ascending: false)
                 .execute()
                 .value
