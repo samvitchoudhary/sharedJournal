@@ -13,7 +13,7 @@ struct LabeledField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(Color.gray)
 
             Group {
@@ -23,8 +23,8 @@ struct LabeledField: View {
                     TextField("", text: $text)
                 }
             }
-            .font(.system(size: 11))
-            .padding(8)
+            .font(.system(size: 13))
+            .padding(11)
             .background(Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 9)

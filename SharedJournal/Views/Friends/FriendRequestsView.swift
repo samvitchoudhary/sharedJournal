@@ -95,9 +95,9 @@ struct FriendRequestsView: View {
     private func section<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
-                .font(.system(size: 9, weight: .medium))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(Color(red: 0xbb / 255.0, green: 0xbb / 255.0, blue: 0xbb / 255.0))
-                .kerning(0.07 * 9)
+                .kerning(0.07 * 11)
                 .padding(.bottom, 10)
 
             content()
@@ -111,11 +111,11 @@ struct FriendRequestsView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.otherUser.displayName)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
                     Text("@\(item.otherUser.username)")
-                        .font(.system(size: 10))
+                        .font(.system(size: 12))
                         .foregroundColor(Color(red: 0xaa / 255.0, green: 0xaa / 255.0, blue: 0xaa / 255.0))
                 }
 
@@ -129,10 +129,10 @@ struct FriendRequestsView: View {
                     }
                 } label: {
                     Text("Accept")
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .background(Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0))
                         .cornerRadius(7)
                 }
@@ -143,10 +143,10 @@ struct FriendRequestsView: View {
                     }
                 } label: {
                     Text("Decline")
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .background(Color(red: 0xed / 255.0, green: 0xe9 / 255.0, blue: 0xff / 255.0))
                         .cornerRadius(7)
                 }
@@ -169,18 +169,18 @@ struct FriendRequestsView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.otherUser.displayName)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
                 Text("@\(item.otherUser.username)")
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                     .foregroundColor(Color(red: 0xaa / 255.0, green: 0xaa / 255.0, blue: 0xaa / 255.0))
             }
 
             Spacer()
 
             Text("Pending")
-                .font(.system(size: 9))
+                .font(.system(size: 10))
                 .foregroundColor(Color(red: 0xbb / 255.0, green: 0xbb / 255.0, blue: 0xbb / 255.0))
         }
         .padding(10)
@@ -198,10 +198,10 @@ struct FriendRequestsView: View {
         ZStack {
             Circle()
                 .fill(item.accentColor)
-                .frame(width: 32, height: 32)
+                .frame(width: 38, height: 38)
 
             Text(initial(for: item.otherUser))
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.white)
         }
     }

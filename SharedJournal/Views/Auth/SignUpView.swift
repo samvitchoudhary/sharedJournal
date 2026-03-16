@@ -37,11 +37,11 @@ struct SignUpView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Create account")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
                         Text("You'll use this to find friends")
-                            .font(.system(size: 11))
+                            .font(.system(size: 13))
                             .foregroundColor(Color(red: 0x88 / 255.0, green: 0x88 / 255.0, blue: 0x88 / 255.0))
                     }
                     .padding(.top, 8)
@@ -90,7 +90,7 @@ struct SignUpView: View {
 
                     if let errorMessage {
                         Text(errorMessage)
-                            .font(.system(size: 11))
+                            .font(.system(size: 13))
                             .foregroundColor(.red)
                     }
 
@@ -101,7 +101,7 @@ struct SignUpView: View {
                     } label: {
                         ZStack {
                             Text("Create account")
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white)
                                 .opacity(isLoading ? 0 : 1)
 
@@ -111,7 +111,7 @@ struct SignUpView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 13)
                         .background(accentColor)
                         .cornerRadius(12)
                     }
@@ -152,18 +152,18 @@ private struct LabeledUsernameField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(Color.gray)
 
             HStack(spacing: 4) {
                 Text("@")
-                    .font(.system(size: 11))
+                    .font(.system(size: 13))
                     .foregroundColor(Color.gray)
 
                 TextField("", text: $text)
-                    .font(.system(size: 11))
+                    .font(.system(size: 13))
             }
-            .padding(8)
+            .padding(11)
             .background(Color.white)
             .overlay(
                 RoundedRectangle(cornerRadius: 9)

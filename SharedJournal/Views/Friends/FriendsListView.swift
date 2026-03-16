@@ -26,66 +26,74 @@ struct FriendsListView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                backgroundColor
-                    .ignoresSafeArea()
+        ZStack {
+            Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
+                .ignoresSafeArea()
 
-                VStack(alignment: .leading, spacing: 0) {
-                    topBar
+            VStack(alignment: .leading, spacing: 0) {
+                topBar
 
-                    if isLoading {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    } else if items.isEmpty {
-                        emptyState
-                    } else {
-                            ScrollView {
-                                LazyVStack(spacing: 8) {
-                                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                                        let color = accentColors[index % accentColors.count]
+                if isLoading {
+                    Spacer()
+                    ProgressView()
+                    Spacer()
+                } else if items.isEmpty {
+                    emptyState
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                                let color = accentColors[index % accentColors.count]
 
-                                        NavigationLink {
-                                            Text("Friend Profile")
-                                        } label: {
-                                            friendRow(item: item, accentColor: color)
-                                        }
+                                if let currentUser = authState.currentUser {
+                                    NavigationLink {
+                                        FriendProfileView(
+                                            friendship: item.friendship,
+                                            friendProfile: item.otherUser,
+                                            currentUserProfile: currentUser,
+                                            accentColor: color
+                                        )
+                                        .environmentObject(authState)
+                                    } label: {
+                                        friendRow(item: item, accentColor: color)
                                     }
+                                } else {
+                                    friendRow(item: item, accentColor: color)
                                 }
-                                .padding(.horizontal, 12)
-                                .padding(.top, 12)
                             }
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.top, 12)
                     }
                 }
             }
-            .sheet(isPresented: $showAddFriend, onDismiss: {
-                Task {
-                    await loadFriends()
-                }
-            }) {
-                AddFriendView()
-                    .environmentObject(authState)
-            }
-            .sheet(isPresented: $showRequests, onDismiss: {
-                Task {
-                    await refreshCounts()
-                }
-            }) {
-                FriendRequestsView()
-                    .environmentObject(authState)
-            }
-            .task {
+        }
+        .sheet(isPresented: $showAddFriend, onDismiss: {
+            Task {
                 await loadFriends()
+            }
+        }) {
+            AddFriendView()
+                .environmentObject(authState)
+        }
+        .sheet(isPresented: $showRequests, onDismiss: {
+            Task {
                 await refreshCounts()
             }
+        }) {
+            FriendRequestsView()
+                .environmentObject(authState)
+        }
+        .task {
+            await loadFriends()
+            await refreshCounts()
         }
     }
 
     private var topBar: some View {
         HStack {
             Text("Friends")
-                .font(.system(size: 22, weight: .medium))
+                .font(.system(size: 28, weight: .medium))
                 .foregroundColor(titleColor)
 
             Spacer()
@@ -123,11 +131,11 @@ struct FriendsListView: View {
     private var emptyState: some View {
         VStack(spacing: 6) {
             Text("No friends yet")
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundColor(Color(red: 0x99 / 255.0, green: 0x99 / 255.0, blue: 0x99 / 255.0))
 
             Text("Tap + to add your first friend")
-                .font(.system(size: 13))
+                .font(.system(size: 15))
                 .foregroundColor(Color(red: 0xbb / 255.0, green: 0xbb / 255.0, blue: 0xbb / 255.0))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -139,20 +147,20 @@ struct FriendsListView: View {
             ZStack {
                 Circle()
                     .fill(accentColor)
-                    .frame(width: 44, height: 44)
+                    .frame(width: 50, height: 50)
 
                 Text(initial(for: item.otherUser))
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.otherUser.displayName)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(titleColor)
 
                 Text("\(item.memoryCount) memories together")
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                     .foregroundColor(Color(red: 0x99 / 255.0, green: 0x99 / 255.0, blue: 0x99 / 255.0))
             }
 
@@ -162,12 +170,12 @@ struct FriendsListView: View {
                 .font(.system(size: 14))
                 .foregroundColor(Color(red: 0xcc / 255.0, green: 0xcc / 255.0, blue: 0xcc / 255.0))
         }
-        .padding(12)
+        .padding(14)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 14)
                 .fill(Color.white)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 14)
                         .stroke(Color(red: 0xed / 255.0, green: 0xe9 / 255.0, blue: 0xff / 255.0), lineWidth: 0.5)
                 )
         )

@@ -36,11 +36,11 @@ struct LoginView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Welcome back")
-                            .font(.system(size: 20, weight: .medium))
+                            .font(.system(size: 24, weight: .medium))
                             .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
                         Text("Good to see you again")
-                            .font(.system(size: 11))
+                            .font(.system(size: 13))
                             .foregroundColor(Color(red: 0x88 / 255.0, green: 0x88 / 255.0, blue: 0x88 / 255.0))
                     }
                     .padding(.top, 8)
@@ -57,14 +57,14 @@ struct LoginView: View {
                             // Forgot password action
                         } label: {
                             Text("Forgot password?")
-                                .font(.system(size: 9))
+                                .font(.system(size: 11))
                                 .foregroundColor(accentColor)
                         }
                     }
 
                     if let errorMessage {
                         Text(errorMessage)
-                            .font(.system(size: 11))
+                            .font(.system(size: 13))
                             .foregroundColor(.red)
                     }
 
@@ -75,7 +75,7 @@ struct LoginView: View {
                     } label: {
                         ZStack {
                             Text("Log in")
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white)
                                 .opacity(isLoading ? 0 : 1)
 
@@ -85,7 +85,7 @@ struct LoginView: View {
                             }
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 13)
                         .background(accentColor)
                         .cornerRadius(10)
                     }
@@ -115,11 +115,11 @@ struct LoginView: View {
                             Image(systemName: "apple.logo")
                                 .foregroundColor(.white)
                             Text("Sign in with Apple")
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(.white)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 13)
                         .background(Color.black)
                         .cornerRadius(10)
                     }

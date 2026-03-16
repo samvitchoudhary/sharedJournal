@@ -41,7 +41,7 @@ struct AddFriendView: View {
         .task {
             await loadExistingFriends()
         }
-        .onChange(of: searchText) { newValue in
+        .onChange(of: searchText) { oldValue, newValue in
             Task {
                 await searchUsers(query: newValue)
             }
@@ -53,7 +53,7 @@ struct AddFriendView: View {
             Spacer()
 
             Text("Add friend")
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 20, weight: .medium))
                 .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
             Spacer()
@@ -76,9 +76,9 @@ struct AddFriendView: View {
                 .foregroundColor(Color.gray)
 
             TextField("Search by username...", text: $searchText)
-                .font(.system(size: 13))
+                .font(.system(size: 14))
         }
-        .padding(12)
+        .padding(14)
         .background(Color.white)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
@@ -94,20 +94,20 @@ struct AddFriendView: View {
             ZStack {
                 Circle()
                     .fill(Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0))
-                    .frame(width: 44, height: 44)
+                    .frame(width: 46, height: 46)
 
                 Text(initial(for: result.profile))
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(result.profile.displayName)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
 
                 Text("@\(result.profile.username)")
-                    .font(.system(size: 11))
+                    .font(.system(size: 12))
                     .foregroundColor(Color(red: 0x99 / 255.0, green: 0x99 / 255.0, blue: 0x99 / 255.0))
             }
 
@@ -119,7 +119,7 @@ struct AddFriendView: View {
                 }
             } label: {
                 Text(result.requestSent ? "Sent" : "Add")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(result.requestSent ? Color.gray : Color.white)
                     .padding(.vertical, 5)
                     .padding(.horizontal, 10)
