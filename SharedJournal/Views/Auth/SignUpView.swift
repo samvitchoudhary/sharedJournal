@@ -44,30 +44,34 @@ struct SignUpView: View {
                     .padding(.top, 8)
 
                     // Avatar picker
-                    Button {
-                        // Avatar picker action to be implemented
-                    } label: {
-                        ZStack {
-                            Circle()
-                                .fill(Color(red: 0xed / 255.0, green: 0xe9 / 255.0, blue: 0xff / 255.0))
-                                .frame(width: 54, height: 54)
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(
-                                            style: StrokeStyle(
-                                                lineWidth: 2,
-                                                dash: [6]
+                    HStack {
+                        Spacer()
+                        Button {
+                            // Avatar picker action to be implemented
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color(red: 0xed / 255.0, green: 0xe9 / 255.0, blue: 0xff / 255.0))
+                                    .frame(width: 54, height: 54)
+                                    .overlay(
+                                        Circle()
+                                            .strokeBorder(
+                                                style: StrokeStyle(
+                                                    lineWidth: 2,
+                                                    dash: [6]
+                                                )
                                             )
-                                        )
-                                        .foregroundColor(Color(red: 0xb3 / 255.0, green: 0xa6 / 255.0, blue: 0xf0 / 255.0))
-                                )
+                                            .foregroundColor(Color(red: 0xb3 / 255.0, green: 0xa6 / 255.0, blue: 0xf0 / 255.0))
+                                    )
 
-                            Text("+")
-                                .font(.system(size: 22))
-                                .foregroundColor(Color(red: 0x9b / 255.0, green: 0x8b / 255.0, blue: 0xe0 / 255.0))
+                                Text("+")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(Color(red: 0x9b / 255.0, green: 0x8b / 255.0, blue: 0xe0 / 255.0))
+                            }
                         }
+                        .buttonStyle(.plain)
+                        Spacer()
                     }
-                    .buttonStyle(.plain)
                     .padding(.top, 12)
 
                     VStack(spacing: 14) {
@@ -92,7 +96,7 @@ struct SignUpView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(accentColor)
-                            .cornerRadius(10)
+                            .cornerRadius(12)
                     }
                     .padding(.top, 20)
                 }
@@ -100,6 +104,7 @@ struct SignUpView: View {
                 .padding(.bottom, 24)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 
     private func signUp() async {

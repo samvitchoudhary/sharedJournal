@@ -111,6 +111,7 @@ struct LoginView: View {
                 .padding(.bottom, 24)
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
 
     private func login() async {
