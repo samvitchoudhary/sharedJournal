@@ -16,7 +16,7 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            Text("Home Feed")
+            HomeFeedView()
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("Home")
