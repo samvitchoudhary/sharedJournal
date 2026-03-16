@@ -18,7 +18,7 @@ struct ContentView: View {
             } else if authState.isAuthenticated {
                 Text("Home")
             } else {
-                Text("Welcome")
+                WelcomeView()
             }
         }
     }
