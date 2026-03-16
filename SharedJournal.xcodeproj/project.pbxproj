@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		91C611272F68A2CF006E8807 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 91C611262F68A2CF006E8807 /* SDWebImageSwiftUI */; };
+		91C6112A2F68A308006E8807 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 91C611292F68A308006E8807 /* Lottie */; };
+		91C6112D2F68A3FD006E8807 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 91C6112C2F68A3FD006E8807 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		91C611122F689E42006E8807 /* SharedJournal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SharedJournal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91C611272F68A2CF006E8807 /* SDWebImageSwiftUI in Frameworks */,
+				91C6112A2F68A308006E8807 /* Lottie in Frameworks */,
+				91C6112D2F68A3FD006E8807 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				91C611142F689E42006E8807 /* SharedJournal */,
+				91C6112B2F68A3FD006E8807 /* Frameworks */,
 				91C611132F689E42006E8807 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +53,13 @@
 				91C611122F689E42006E8807 /* SharedJournal.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		91C6112B2F68A3FD006E8807 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +82,9 @@
 			);
 			name = SharedJournal;
 			packageProductDependencies = (
+				91C611262F68A2CF006E8807 /* SDWebImageSwiftUI */,
+				91C611292F68A308006E8807 /* Lottie */,
+				91C6112C2F68A3FD006E8807 /* Supabase */,
 			);
 			productName = SharedJournal;
 			productReference = 91C611122F689E42006E8807 /* SharedJournal.app */;
@@ -94,6 +114,11 @@
 			);
 			mainGroup = 91C611092F689E42006E8807;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				91C611242F68A2B3006E8807 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				91C611252F68A2CF006E8807 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				91C611282F68A308006E8807 /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 91C611132F689E42006E8807 /* Products */;
 			projectDirPath = "";
@@ -332,6 +357,51 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		91C611242F68A2B3006E8807 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+		91C611252F68A2CF006E8807 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.4;
+			};
+		};
+		91C611282F68A308006E8807 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		91C611262F68A2CF006E8807 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 91C611252F68A2CF006E8807 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		91C611292F68A308006E8807 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 91C611282F68A308006E8807 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+		91C6112C2F68A3FD006E8807 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 91C611242F68A2B3006E8807 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 91C6110A2F689E42006E8807 /* Project object */;
 }

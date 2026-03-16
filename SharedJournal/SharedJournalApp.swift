@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import Supabase
 
 @main
 struct SharedJournalApp: App {
+    @StateObject private var authState = AuthState()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(authState)
         }
     }
 }
