@@ -16,7 +16,8 @@ struct ContentView: View {
                 Color.white
                     .ignoresSafeArea()
             } else if authState.isAuthenticated {
-                Text("Home")
+                MainTabView()
+                    .environmentObject(authState)
             } else {
                 WelcomeView()
             }
