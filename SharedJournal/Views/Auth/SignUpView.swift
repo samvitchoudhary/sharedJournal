@@ -7,11 +7,14 @@ import SwiftUI
 
 struct SignUpView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authState: AuthState
 
     @State private var displayName: String = ""
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var isLoading: Bool = false
+    @State private var errorMessage: String?
 
     private let backgroundColor = Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
     private let accentColor = Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0)
@@ -85,19 +88,34 @@ struct SignUpView: View {
                     }
                     .padding(.top, 8)
 
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.system(size: 11))
+                            .foregroundColor(.red)
+                    }
+
                     Button {
                         Task {
-                            await signUp()
+                            await handleSignUp()
                         }
                     } label: {
-                        Text("Create account")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(accentColor)
-                            .cornerRadius(12)
+                        ZStack {
+                            Text("Create account")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(.white)
+                                .opacity(isLoading ? 0 : 1)
+
+                            if isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(accentColor)
+                        .cornerRadius(12)
                     }
+                    .disabled(isLoading)
                     .padding(.top, 20)
                 }
                 .padding(.horizontal, 16)
@@ -107,8 +125,23 @@ struct SignUpView: View {
         .navigationBarBackButtonHidden(true)
     }
 
-    private func signUp() async {
-        print("sign up tapped")
+    private func handleSignUp() async {
+        guard !isLoading else { return }
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            try await authState.signUp(
+                email: email,
+                password: password,
+                username: username,
+                displayName: displayName
+            )
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
     }
 }
 
