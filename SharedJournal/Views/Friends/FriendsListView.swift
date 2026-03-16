@@ -12,6 +12,8 @@ struct FriendsListView: View {
     @State private var items: [FriendItem] = []
     @State private var isLoading: Bool = true
     @State private var showAddFriend: Bool = false
+    @State private var showRequests: Bool = false
+    @State private var pendingIncomingCount: Int = 0
 
     private let backgroundColor = Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
     private let titleColor = Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0)
@@ -65,8 +67,17 @@ struct FriendsListView: View {
                 AddFriendView()
                     .environmentObject(authState)
             }
+            .sheet(isPresented: $showRequests, onDismiss: {
+                Task {
+                    await refreshCounts()
+                }
+            }) {
+                FriendRequestsView()
+                    .environmentObject(authState)
+            }
             .task {
                 await loadFriends()
+                await refreshCounts()
             }
         }
     }
@@ -78,6 +89,24 @@ struct FriendsListView: View {
                 .foregroundColor(titleColor)
 
             Spacer()
+
+            Button {
+                showRequests = true
+            } label: {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bell")
+                        .font(.system(size: 18))
+                        .foregroundColor(Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0))
+
+                    if pendingIncomingCount > 0 {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 10, height: 10)
+                            .offset(x: 5, y: -5)
+                    }
+                }
+            }
+            .padding(.trailing, 8)
 
             Button {
                 showAddFriend = true
@@ -201,6 +230,36 @@ struct FriendsListView: View {
             await MainActor.run {
                 items = []
                 isLoading = false
+            }
+        }
+    }
+
+    private func refreshCounts() async {
+        guard let currentUser = authState.currentUser else {
+            await MainActor.run {
+                pendingIncomingCount = 0
+            }
+            return
+        }
+
+        do {
+            let friendships: [Friendship] = try await SupabaseManager.shared
+                .from("friendships")
+                .select()
+                .eq("status", value: "pending")
+                .or("user_a_id.eq.\(currentUser.id),user_b_id.eq.\(currentUser.id)")
+                .execute()
+                .value
+
+            let incoming = friendships.filter { $0.requesterId != currentUser.id }
+
+            await MainActor.run {
+                pendingIncomingCount = incoming.count
+            }
+        } catch {
+            print("Failed to load pending requests count:", error)
+            await MainActor.run {
+                pendingIncomingCount = 0
             }
         }
     }
