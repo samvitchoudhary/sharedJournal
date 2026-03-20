@@ -8,332 +8,295 @@ import Supabase
 import PhotosUI
 
 struct AddMemoryView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var authState: AuthState
-
     let friendship: Friendship
     let friendProfile: Profile
     let accentColor: Color
     let onSave: () -> Void
 
-    @State private var memoryDate: Date = .now
-    @State private var title: String = ""
-    @State private var bodyText: String = ""
-    @State private var location: String = ""
-    @State private var selectedPhotoItems: [PhotosPickerItem] = []
-    @State private var loadedImages: [UIImage] = []
-    @State private var isSaving: Bool = false
-    @State private var errorMessage: String?
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var authState: AuthState
 
-    private let backgroundColor = Color(red: 0xf0 / 255.0, green: 0xff / 255.0, blue: 0xf4 / 255.0)
-    private let borderColor = Color(red: 0xc8 / 255.0, green: 0xf5 / 255.0, blue: 0xd8 / 255.0)
+    @State private var title = ""
+    @State private var memoryBody = ""
+    @State private var memoryDate = Date()
+    @State private var selectedPhotos: [PhotosPickerItem] = []
+    @State private var selectedImages: [UIImage] = []
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
 
     var body: some View {
         ZStack {
-            backgroundColor
-                .ignoresSafeArea()
+            Color(red: 240/255, green: 1, blue: 244/255).ignoresSafeArea()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    header
+            VStack(spacing: 0) {
+                // Header
+                HStack {
+                    Button("Cancel") { dismiss() }
+                        .foregroundColor(Color(white: 0.6))
+                        .font(.system(size: 13))
+                    Spacer()
+                    Text("New memory")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(Color(red: 26/255, green: 46/255, blue: 26/255))
+                    Spacer()
+                    Button("Save") {
+                        Task { await saveMemory() }
+                    }
+                    .foregroundColor(Color(red: 46/255, green: 204/255, blue: 113/255))
+                    .font(.system(size: 13, weight: .medium))
+                    .disabled(isLoading || title.isEmpty)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
 
-                    fieldSection(label: "WITH") {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // With chip
+                        HStack {
+                            Text("WITH")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color(white: 0.53))
+                                .tracking(1)
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 5)
+
                         HStack(spacing: 8) {
-                            ZStack {
-                                Circle()
-                                    .fill(accentColor)
-                                    .frame(width: 22, height: 22)
-                                Text(friendProfile.displayName.first.map { String($0) } ?? "?")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .foregroundColor(.white)
-                            }
+                            Circle()
+                                .fill(accentColor)
+                                .frame(width: 24, height: 24)
+                                .overlay(
+                                    Text(String(friendProfile.displayName.prefix(1)))
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.white)
+                                )
                             Text(friendProfile.displayName)
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(Color(red: 0x33 / 255.0, green: 0x33 / 255.0, blue: 0x33 / 255.0))
+                                .foregroundColor(Color(red: 51/255, green: 51/255, blue: 51/255))
+                            Spacer()
                         }
-                        .padding(.vertical, 6)
-                    }
+                        .padding(10)
+                        .background(Color.white)
+                        .cornerRadius(9)
+                        .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color(red: 200/255, green: 245/255, blue: 216/255), lineWidth: 0.5))
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
 
-                    fieldSection(label: "DATE") {
-                        DatePicker("", selection: $memoryDate, displayedComponents: .date)
-                            .datePickerStyle(.compact)
-                            .labelsHidden()
-                    }
+                        // Date
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("DATE")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color(white: 0.53))
+                                .tracking(1)
+                            DatePicker("", selection: $memoryDate, displayedComponents: .date)
+                                .labelsHidden()
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.white)
+                                .cornerRadius(9)
+                                .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color(red: 200/255, green: 245/255, blue: 216/255), lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
 
-                    fieldSection(label: "TITLE") {
-                        TextField("Give this memory a title...", text: $title)
-                            .font(.system(size: 12))
-                            .padding(10)
-                            .background(Color.white)
-                            .overlay(RoundedRectangle(cornerRadius: 9).stroke(borderColor, lineWidth: 0.5))
-                            .cornerRadius(9)
-                    }
+                        // Title
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("TITLE")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color(white: 0.53))
+                                .tracking(1)
+                            TextField("Give this memory a title...", text: $title)
+                                .font(.system(size: 13))
+                                .padding(10)
+                                .background(Color.white)
+                                .cornerRadius(9)
+                                .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color(red: 200/255, green: 245/255, blue: 216/255), lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
 
-                    fieldSection(label: "WHAT HAPPENED") {
-                        TextEditor(text: $bodyText)
-                            .font(.system(size: 12))
-                            .scrollContentBackground(.hidden)
-                            .padding(10)
-                            .frame(minHeight: 80)
-                            .background(Color.white)
-                            .overlay(RoundedRectangle(cornerRadius: 9).stroke(borderColor, lineWidth: 0.5))
-                            .cornerRadius(9)
-                            .overlay(alignment: .topLeading) {
-                                if bodyText.isEmpty {
+                        // Body
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("WHAT HAPPENED?")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color(white: 0.53))
+                                .tracking(1)
+                            ZStack(alignment: .topLeading) {
+                                if memoryBody.isEmpty {
                                     Text("Write about this memory...")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(Color.gray)
-                                        .padding(14)
-                                        .allowsHitTesting(false)
+                                        .font(.system(size: 13))
+                                        .foregroundColor(Color(white: 0.75))
+                                        .padding(10)
                                 }
+                                TextEditor(text: $memoryBody)
+                                    .font(.system(size: 13))
+                                    .frame(height: 100)
+                                    .padding(6)
+                                    .scrollContentBackground(.hidden)
                             }
-                    }
-
-                    fieldSection(label: "LOCATION (optional)") {
-                        TextField("Add a place...", text: $location)
-                            .font(.system(size: 12))
-                            .padding(10)
                             .background(Color.white)
-                            .overlay(RoundedRectangle(cornerRadius: 9).stroke(borderColor, lineWidth: 0.5))
                             .cornerRadius(9)
+                            .overlay(RoundedRectangle(cornerRadius: 9).stroke(Color(red: 200/255, green: 245/255, blue: 216/255), lineWidth: 0.5))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+
+                        // Photos
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("PHOTOS")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(Color(white: 0.53))
+                                .tracking(1)
+                            HStack(spacing: 8) {
+                                ForEach(Array(selectedImages.enumerated()), id: \.offset) { _, image in
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 56, height: 56)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                PhotosPicker(selection: $selectedPhotos, maxSelectionCount: 5, matching: .images) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [4]))
+                                            .foregroundColor(Color(red: 178/255, green: 223/255, blue: 203/255))
+                                            .frame(width: 56, height: 56)
+                                        Text("+")
+                                            .font(.system(size: 24, weight: .light))
+                                            .foregroundColor(Color(red: 95/255, green: 196/255, blue: 136/255))
+                                    }
+                                }
+                                .onChange(of: selectedPhotos) { _, newItems in
+                                    Task {
+                                        selectedImages = []
+                                        for item in newItems {
+                                            if let data = try? await item.loadTransferable(type: Data.self),
+                                               let image = UIImage(data: data) {
+                                                selectedImages.append(image)
+                                            }
+                                        }
+                                    }
+                                }
+                                Spacer()
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.system(size: 12))
+                                .foregroundColor(.red)
+                                .padding(.horizontal, 16)
+                                .padding(.bottom, 8)
+                        }
+
+                        // Save button
+                        Button {
+                            Task { await saveMemory() }
+                        } label: {
+                            if isLoading {
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 13)
+                            } else {
+                                Text("Save memory")
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 13)
+                            }
+                        }
+                        .background(title.isEmpty ? Color.gray.opacity(0.4) : Color(red: 46/255, green: 204/255, blue: 113/255))
+                        .cornerRadius(12)
+                        .disabled(isLoading || title.isEmpty)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 30)
                     }
-
-                    photosRow
-
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .font(.system(size: 12))
-                            .foregroundColor(.red)
-                            .padding(.horizontal, 14)
-                            .padding(.top, 8)
-                    }
-
-                    saveButton
-                }
-                .padding(.bottom, 24)
-            }
-        }
-        .onChange(of: selectedPhotoItems) { oldValue, newValue in
-            Task {
-                await loadImages(from: newValue)
-            }
-        }
-    }
-
-    private var header: some View {
-        HStack {
-            Button("Cancel") {
-                dismiss()
-            }
-            .font(.system(size: 11))
-            .foregroundColor(Color(red: 0x99 / 255.0, green: 0x99 / 255.0, blue: 0x99 / 255.0))
-
-            Spacer()
-
-            Text("New memory")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundColor(Color(red: 0x1a / 255.0, green: 0x2e / 255.0, blue: 0x1a / 255.0))
-
-            Spacer()
-
-            Button("Save") {
-                Task { await saveMemory() }
-            }
-            .font(.system(size: 12, weight: .medium))
-            .foregroundColor(Color(red: 0x2e / 255.0, green: 0xcc / 255.0, blue: 0x71 / 255.0))
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 16)
-        .padding(.bottom, 12)
-    }
-
-    private func fieldSection<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(Color(red: 0x33 / 255.0, green: 0x33 / 255.0, blue: 0x33 / 255.0))
-            content()
-        }
-        .padding(.horizontal, 14)
-        .padding(.bottom, 10)
-    }
-
-    private var photosRow: some View {
-        HStack(spacing: 8) {
-            ForEach(Array(loadedImages.enumerated()), id: \.offset) { _, image in
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 48, height: 48)
-                    .clipped()
-                    .cornerRadius(8)
-            }
-
-            PhotosPicker(
-                selection: $selectedPhotoItems,
-                maxSelectionCount: 10,
-                matching: .images
-            ) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(
-                            style: StrokeStyle(lineWidth: 2, dash: [6])
-                        )
-                        .foregroundColor(Color(red: 0xb2 / 255.0, green: 0xdf / 255.0, blue: 0xcb / 255.0))
-                        .frame(width: 48, height: 48)
-                    Text("+")
-                        .font(.system(size: 22))
-                        .foregroundColor(Color(red: 0x5f / 255.0, green: 0xc4 / 255.0, blue: 0x88 / 255.0))
                 }
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 8)
     }
 
-    private var saveButton: some View {
-        Button {
-            Task { await saveMemory() }
-        } label: {
-            Text("Save memory")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(Color(red: 0x2e / 255.0, green: 0xcc / 255.0, blue: 0x71 / 255.0))
-                .cornerRadius(12)
-        }
-        .disabled(isSaving)
-        .padding(.horizontal, 14)
-        .padding(.top, 16)
-        .padding(.bottom, 14)
-    }
-
-    private func loadImages(from items: [PhotosPickerItem]) async {
-        var images: [UIImage] = []
-        for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let img = UIImage(data: data) {
-                images.append(img)
-            }
-        }
+    func saveMemory() async {
+        guard let currentUser = authState.currentUser else { return }
         await MainActor.run {
-            loadedImages = images
-        }
-    }
-
-    private func saveMemory() async {
-        guard !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            await MainActor.run {
-                errorMessage = "Please enter a title."
-            }
-            return
-        }
-
-        guard let authorId = authState.currentUser?.id else {
-            await MainActor.run { errorMessage = "Not signed in." }
-            return
-        }
-
-        await MainActor.run {
-            isSaving = true
+            isLoading = true
             errorMessage = nil
         }
 
-        do {
-            let supabase = SupabaseManager.shared
-            let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-            let trimmedBody = bodyText.isEmpty ? nil : bodyText.trimmingCharacters(in: .whitespacesAndNewlines)
-            let trimmedLocation = location.isEmpty ? nil : location.trimmingCharacters(in: .whitespacesAndNewlines)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let memoryDateString = dateFormatter.string(from: memoryDate)
 
+        do {
             struct MemoryInsert: Encodable {
-                let friendshipId: UUID
-                let authorId: UUID
+                let friendship_id: UUID
+                let author_id: UUID
                 let title: String
                 let body: String?
-                let memoryDate: String
-                let location: String?
-                let isFavorite: Bool
-                enum CodingKeys: String, CodingKey {
-                    case friendshipId = "friendship_id"
-                    case authorId = "author_id"
-                    case title
-                    case body
-                    case memoryDate = "memory_date"
-                    case location
-                    case isFavorite = "is_favorite"
-                }
+                let memory_date: String
+                let is_favorite: Bool
             }
 
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            let memoryDateString = dateFormatter.string(from: memoryDate)
-
-            let insert = MemoryInsert(
-                friendshipId: friendship.id,
-                authorId: authorId,
-                title: trimmedTitle,
-                body: trimmedBody,
-                memoryDate: memoryDateString,
-                location: trimmedLocation,
-                isFavorite: false
-            )
-
-            let inserted: [Memory] = try await supabase
+            let inserted: [Memory] = try await SupabaseManager.shared
                 .from("memories")
-                .insert(insert)
+                .insert(MemoryInsert(
+                    friendship_id: friendship.id,
+                    author_id: currentUser.id,
+                    title: title,
+                    body: memoryBody.isEmpty ? nil : memoryBody,
+                    memory_date: memoryDateString,
+                    is_favorite: false
+                ))
                 .select()
                 .execute()
                 .value
 
-            guard let memory = inserted.first else {
-                throw NSError(domain: "AddMemory", code: -1, userInfo: [NSLocalizedDescriptionKey: "Insert did not return memory"])
+            guard let newMemory = inserted.first else {
+                throw NSError(domain: "AddMemory", code: -1, userInfo: [NSLocalizedDescriptionKey: "Insert did not return a memory"])
             }
 
-            let memoryId = memory.id
-            let friendshipIdStr = friendship.id.uuidString
-            let memoryIdStr = memoryId.uuidString
-
-            for (index, image) in loadedImages.enumerated() {
-                guard let jpegData = image.jpegData(compressionQuality: 0.8) else { continue }
+            let supabase = SupabaseManager.shared
+            for (index, image) in selectedImages.enumerated() {
+                guard let imageData = image.jpegData(compressionQuality: 0.8) else { continue }
                 let fileName = "\(UUID().uuidString).jpg"
-                let path = "\(friendshipIdStr)/\(memoryIdStr)/\(fileName)"
+                let photoPath = "\(friendship.id.uuidString)/\(newMemory.id.uuidString)/\(fileName)"
 
                 try await supabase.storage
                     .from("memory-photos")
-                    .upload(path, data: jpegData)
+                    .upload(photoPath, data: imageData)
 
-                let publicURL = try supabase.storage.from("memory-photos").getPublicURL(path: path).absoluteString
+                let publicURL = try supabase.storage.from("memory-photos").getPublicURL(path: photoPath).absoluteString
 
                 struct PhotoInsert: Encodable {
-                    let memoryId: UUID
+                    let memory_id: UUID
                     let url: String
-                    let displayOrder: Int
-                    let uploadedBy: UUID
-                    enum CodingKeys: String, CodingKey {
-                        case memoryId = "memory_id"
-                        case url
-                        case displayOrder = "display_order"
-                        case uploadedBy = "uploaded_by"
-                    }
+                    let display_order: Int
+                    let uploaded_by: UUID
                 }
-                let photoInsert = PhotoInsert(
-                    memoryId: memoryId,
-                    url: publicURL,
-                    displayOrder: index,
-                    uploadedBy: authorId
-                )
-                try await supabase.from("photos").insert(photoInsert).execute()
+
+                try await supabase
+                    .from("photos")
+                    .insert(PhotoInsert(
+                        memory_id: newMemory.id,
+                        url: publicURL,
+                        display_order: index,
+                        uploaded_by: currentUser.id
+                    ))
+                    .execute()
             }
 
             await MainActor.run {
-                isSaving = false
+                isLoading = false
                 onSave()
                 dismiss()
             }
         } catch {
             await MainActor.run {
-                isSaving = false
+                isLoading = false
                 errorMessage = error.localizedDescription
             }
         }

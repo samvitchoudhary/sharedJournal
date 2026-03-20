@@ -6,20 +6,28 @@
 import SwiftUI
 import Supabase
 
+struct AddMemoryContext: Identifiable {
+    let id = UUID()
+    let friendship: Friendship
+    let friendProfile: Profile
+    let accentColor: Color
+}
+
 struct HomeFeedView: View {
     @EnvironmentObject var authState: AuthState
 
     @State private var friendships: [Friendship] = []
     @State private var friendItems: [FriendItem] = []
+    @State private var friendProfiles: [UUID: Profile] = [:]
+    @State private var accentColors: [UUID: Color] = [:]
     @State private var memories: [Memory] = []
     @State private var isLoading: Bool = true
-    @State private var showFriendPicker: Bool = false
-    @State private var showAddMemorySheet: Bool = false
-    @State private var selectedFriendForMemory: FriendItem?
+    @State private var showFriendPicker = false
+    @State private var addMemoryContext: AddMemoryContext? = nil
 
     private let backgroundColor = Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
     private let titleColor = Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0)
-    private let accentColors: [Color] = [
+    private let accentPalette: [Color] = [
         Color(red: 0xff / 255.0, green: 0x6b / 255.0, blue: 0x35 / 255.0),
         Color(red: 0x5b / 255.0, green: 0x3f / 255.0, blue: 0xf8 / 255.0),
         Color(red: 0x2e / 255.0, green: 0xcc / 255.0, blue: 0x71 / 255.0),
@@ -55,18 +63,31 @@ struct HomeFeedView: View {
             addMemoryButton
         }
         .sheet(isPresented: $showFriendPicker) {
-            friendPickerSheet
+            FriendPickerView(
+                friendships: friendships,
+                friendProfiles: friendProfiles,
+                accentColors: accentColors,
+                memories: memories,
+                onSelect: { friendship, profile, color in
+                    showFriendPicker = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        addMemoryContext = AddMemoryContext(
+                            friendship: friendship,
+                            friendProfile: profile,
+                            accentColor: color
+                        )
+                    }
+                }
+            )
         }
-        .sheet(isPresented: $showAddMemorySheet) {
-            if let item = selectedFriendForMemory {
-                AddMemoryView(
-                    friendship: item.friendship,
-                    friendProfile: item.otherUser,
-                    accentColor: accentColors[(friendItems.firstIndex(where: { $0.id == item.id }) ?? 0) % accentColors.count],
-                    onSave: { Task { await loadData() } }
-                )
-                .environmentObject(authState)
-            }
+        .sheet(item: $addMemoryContext) { context in
+            AddMemoryView(
+                friendship: context.friendship,
+                friendProfile: context.friendProfile,
+                accentColor: context.accentColor,
+                onSave: { Task { await loadData() } }
+            )
+            .environmentObject(authState)
         }
         .task {
             await loadData()
@@ -101,7 +122,7 @@ struct HomeFeedView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
                 ForEach(Array(friendItems.enumerated()), id: \.element.id) { index, item in
-                    let color = accentColors[index % accentColors.count]
+                    let color = accentColors[item.friendship.id] ?? accentPalette[index % accentPalette.count]
                     NavigationLink {
                         FriendProfileView(
                             friendship: item.friendship,
@@ -188,7 +209,7 @@ struct HomeFeedView: View {
         ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(Array(memories.enumerated()), id: \.element.id) { index, memory in
-                    let color = accentColors[index % accentColors.count]
+                    let color = accentColors[memory.friendshipId] ?? accentPalette[index % accentPalette.count]
                     NavigationLink {
                         Text("Memory Detail")
                     } label: {
@@ -259,6 +280,7 @@ struct HomeFeedView: View {
 
     private var addMemoryButton: some View {
         Button {
+            print("FAB tapped - showFriendPicker: \(showFriendPicker)")
             showFriendPicker = true
         } label: {
             ZStack {
@@ -275,66 +297,15 @@ struct HomeFeedView: View {
         .padding(.bottom, 20)
     }
 
-    private var friendPickerSheet: some View {
-        NavigationStack {
-            ZStack {
-                Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
-                    .ignoresSafeArea()
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(Array(friendItems.enumerated()), id: \.element.id) { index, item in
-                            let color = accentColors[index % accentColors.count]
-                            Button {
-                                selectedFriendForMemory = item
-                                showFriendPicker = false
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    showAddMemorySheet = true
-                                }
-                            } label: {
-                                HStack(spacing: 12) {
-                                    ZStack {
-                                        Circle()
-                                            .fill(color)
-                                            .frame(width: 44, height: 44)
-                                        Text(item.otherUser.displayName.first.map { String($0) } ?? "?")
-                                            .font(.system(size: 18, weight: .medium))
-                                            .foregroundColor(.white)
-                                    }
-                                    Text(item.otherUser.displayName)
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(Color(red: 0x1a / 255.0, green: 0x1a / 255.0, blue: 0x2e / 255.0))
-                                    Spacer()
-                                }
-                                .padding(14)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white)
-                                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(red: 0xed / 255.0, green: 0xe9 / 255.0, blue: 0xff / 255.0), lineWidth: 0.5))
-                                )
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(16)
-                }
-            }
-            .navigationTitle("Add memory with...")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        showFriendPicker = false
-                    }
-                }
-            }
-        }
-    }
-
     // MARK: - Helpers
 
     private func loadData() async {
         guard let userId = authState.currentUser?.id else {
-            isLoading = false
+            await MainActor.run {
+                friendProfiles = [:]
+                accentColors = [:]
+                isLoading = false
+            }
             return
         }
 
@@ -351,6 +322,8 @@ struct HomeFeedView: View {
                 await MainActor.run {
                     friendships = []
                     friendItems = []
+                    friendProfiles = [:]
+                    accentColors = [:]
                     memories = []
                     isLoading = false
                 }
@@ -368,7 +341,9 @@ struct HomeFeedView: View {
                 .value
 
             var items: [FriendItem] = []
-            for friendship in loadedFriendships {
+            var profilesByFriendship: [UUID: Profile] = [:]
+            var colorsByFriendship: [UUID: Color] = [:]
+            for (index, friendship) in loadedFriendships.enumerated() {
                 let otherUserId = friendship.userAId == userId ? friendship.userBId : friendship.userAId
                 let profiles: [Profile] = try await SupabaseManager.shared
                     .from("profiles")
@@ -380,11 +355,15 @@ struct HomeFeedView: View {
                 guard let profile = profiles.first else { continue }
                 let count = loadedMemories.filter { $0.friendshipId == friendship.id }.count
                 items.append(FriendItem(friendship: friendship, otherUser: profile, memoryCount: count))
+                profilesByFriendship[friendship.id] = profile
+                colorsByFriendship[friendship.id] = accentPalette[index % accentPalette.count]
             }
 
             await MainActor.run {
                 friendships = loadedFriendships
                 friendItems = items
+                friendProfiles = profilesByFriendship
+                accentColors = colorsByFriendship
                 memories = loadedMemories
                 isLoading = false
             }
@@ -393,6 +372,8 @@ struct HomeFeedView: View {
             await MainActor.run {
                 friendships = []
                 friendItems = []
+                friendProfiles = [:]
+                accentColors = [:]
                 memories = []
                 isLoading = false
             }
