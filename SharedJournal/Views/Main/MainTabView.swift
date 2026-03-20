@@ -37,7 +37,7 @@ struct MainTabView: View {
                 }
 
                 NavigationStack {
-                    Text("Profile")
+                    ProfileView()
                 }
                 .tabItem {
                     Image(systemName: "person.fill")
