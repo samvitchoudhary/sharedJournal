@@ -23,6 +23,7 @@ struct HomeFeedView: View {
     @State private var memories: [Memory] = []
     @State private var isLoading: Bool = true
     @State private var showFriendPicker = false
+    @State private var showAddFriend = false
     @State private var addMemoryContext: AddMemoryContext? = nil
 
     private let backgroundColor = Color(red: 0xf5 / 255.0, green: 0xf3 / 255.0, blue: 0xff / 255.0)
@@ -89,6 +90,10 @@ struct HomeFeedView: View {
             )
             .environmentObject(authState)
         }
+        .sheet(isPresented: $showAddFriend) {
+            AddFriendView()
+                .environmentObject(authState)
+        }
         .task {
             await loadData()
         }
@@ -121,42 +126,46 @@ struct HomeFeedView: View {
     private var friendsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
-                ForEach(Array(friendItems.enumerated()), id: \.element.id) { index, item in
-                    let color = accentColors[item.friendship.id] ?? accentPalette[index % accentPalette.count]
-                    NavigationLink {
-                        FriendProfileView(
-                            friendship: item.friendship,
-                            friendProfile: item.otherUser,
-                            currentUserProfile: authState.currentUser!,
-                            accentColor: color
-                        )
-                        .environmentObject(authState)
-                    } label: {
-                        VStack(spacing: 4) {
-                            ZStack {
-                                Circle()
-                                    .fill(color)
-                                    .frame(width: 62, height: 62)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(Color.white, lineWidth: 3)
-                                    )
+                ForEach(friendItems) { item in
+                    if let friendProfile = friendProfiles[item.friendship.id],
+                       let accentColor = accentColors[item.friendship.id],
+                       let currentUser = authState.currentUser {
+                        NavigationLink(
+                            destination: FriendProfileView(
+                                friendship: item.friendship,
+                                friendProfile: friendProfile,
+                                currentUserProfile: currentUser,
+                                accentColor: accentColor
+                            )
+                            .environmentObject(authState)
+                        ) {
+                            VStack(spacing: 4) {
+                                ZStack {
+                                    Circle()
+                                        .fill(accentColor)
+                                        .frame(width: 62, height: 62)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.white, lineWidth: 3)
+                                        )
 
-                                Text(item.otherUser.displayName.first.map { String($0) } ?? "?")
-                                    .font(.system(size: 22, weight: .medium))
-                                    .foregroundColor(.white)
+                                    Text(friendProfile.displayName.first.map { String($0) } ?? "?")
+                                        .font(.system(size: 22, weight: .medium))
+                                        .foregroundColor(.white)
+                                }
+
+                                Text(friendProfile.displayName)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(Color(red: 0x66 / 255.0, green: 0x66 / 255.0, blue: 0x66 / 255.0))
+                                    .lineLimit(1)
                             }
-
-                            Text(item.otherUser.displayName)
-                                .font(.system(size: 12))
-                                .foregroundColor(Color(red: 0x66 / 255.0, green: 0x66 / 255.0, blue: 0x66 / 255.0))
-                                .lineLimit(1)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
 
-                NavigationLink {
-                    Text("Add Friend")
+                Button {
+                    showAddFriend = true
                 } label: {
                     VStack(spacing: 4) {
                         ZStack {
@@ -184,6 +193,7 @@ struct HomeFeedView: View {
                             .foregroundColor(Color(red: 0x66 / 255.0, green: 0x66 / 255.0, blue: 0x66 / 255.0))
                     }
                 }
+                .buttonStyle(.plain)
             }
             .padding(.leading, 16)
             .padding(.top, 10)
@@ -209,11 +219,24 @@ struct HomeFeedView: View {
         ScrollView {
             LazyVStack(spacing: 10) {
                 ForEach(Array(memories.enumerated()), id: \.element.id) { index, memory in
-                    let color = accentColors[memory.friendshipId] ?? accentPalette[index % accentPalette.count]
-                    NavigationLink {
-                        Text("Memory Detail")
-                    } label: {
-                        memoryCard(memory: memory, accentColor: color)
+                    let fallbackColor = accentColors[memory.friendshipId] ?? accentPalette[index % accentPalette.count]
+                    if let friendship = friendships.first(where: { $0.id == memory.friendshipId }),
+                       let friendProfile = friendProfiles[friendship.id],
+                       let accentColor = accentColors[friendship.id],
+                       let currentUser = authState.currentUser {
+                        NavigationLink(
+                            destination: MemoryDetailView(
+                                memory: memory,
+                                friendProfile: friendProfile,
+                                currentUserProfile: currentUser,
+                                accentColor: accentColor
+                            )
+                        ) {
+                            memoryCard(memory: memory, accentColor: accentColor)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        memoryCard(memory: memory, accentColor: fallbackColor)
                     }
                 }
             }
