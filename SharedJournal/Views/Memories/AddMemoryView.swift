@@ -251,7 +251,7 @@ struct AddMemoryView: View {
                 let authorId: UUID
                 let title: String
                 let body: String?
-                let memoryDate: Date
+                let memoryDate: String
                 let location: String?
                 let isFavorite: Bool
                 enum CodingKeys: String, CodingKey {
@@ -265,12 +265,16 @@ struct AddMemoryView: View {
                 }
             }
 
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let memoryDateString = dateFormatter.string(from: memoryDate)
+
             let insert = MemoryInsert(
                 friendshipId: friendship.id,
                 authorId: authorId,
                 title: trimmedTitle,
                 body: trimmedBody,
-                memoryDate: memoryDate,
+                memoryDate: memoryDateString,
                 location: trimmedLocation,
                 isFavorite: false
             )

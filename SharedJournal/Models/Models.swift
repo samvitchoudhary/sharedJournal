@@ -47,7 +47,7 @@ struct Memory: Codable, Identifiable {
     let authorId: UUID
     let title: String
     let body: String?
-    let memoryDate: Date
+    let memoryDate: String
     let location: String?
     let isFavorite: Bool
     let createdAt: Date
@@ -63,6 +63,16 @@ struct Memory: Codable, Identifiable {
         case isFavorite = "is_favorite"
         case createdAt = "created_at"
     }
+}
+
+/// Formats a Supabase `memory_date` string like `"2026-03-20"` for display.
+func formatMemoryDate(_ dateString: String) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    guard let date = formatter.date(from: dateString) else { return dateString }
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .none
+    return formatter.string(from: date)
 }
 
 struct Photo: Codable, Identifiable {

@@ -25,12 +25,6 @@ struct FriendProfileView: View {
         return f
     }()
 
-    private static var memoryDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "MMM d, yyyy"
-        return f
-    }()
-
     private var favoriteMemories: [Memory] {
         memories.filter { $0.isFavorite }
     }
@@ -323,7 +317,7 @@ struct FriendProfileView: View {
 
     private func favoriteCard(_ memory: Memory) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(Self.memoryDateFormatter.string(from: memory.memoryDate))
+            Text(formatMemoryDate(memory.memoryDate))
                 .font(.system(size: 9))
                 .foregroundColor(.gray)
             Text(memory.title)
@@ -355,13 +349,23 @@ struct FriendProfileView: View {
             }
             .frame(width: 9)
 
-            timelineEntryCard(memory)
+            NavigationLink {
+                MemoryDetailView(
+                    memory: memory,
+                    friendProfile: friendProfile,
+                    currentUserProfile: currentUserProfile,
+                    accentColor: accentColor
+                )
+            } label: {
+                timelineEntryCard(memory)
+            }
+            .buttonStyle(.plain)
         }
     }
 
     private func timelineEntryCard(_ memory: Memory) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(Self.memoryDateFormatter.string(from: memory.memoryDate))
+            Text(formatMemoryDate(memory.memoryDate))
                 .font(.system(size: 9))
                 .foregroundColor(.gray)
             Text(memory.title)

@@ -216,7 +216,7 @@ struct HomeFeedView: View {
 
                 Spacer()
 
-                Text(formattedDate(memory.memoryDate))
+                Text(formatMemoryDate(memory.memoryDate))
                     .font(.system(size: 12))
                     .foregroundColor(Color(red: 0xbb / 255.0, green: 0xbb / 255.0, blue: 0xbb / 255.0))
             }
@@ -403,12 +403,6 @@ struct HomeFeedView: View {
         friendItems.first(where: { $0.friendship.id == id })?.otherUser.displayName ?? "Friend"
     }
 
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
-    }
 }
 
 #Preview {
