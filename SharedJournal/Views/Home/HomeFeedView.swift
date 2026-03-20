@@ -85,7 +85,7 @@ struct HomeFeedView: View {
             Spacer()
 
             NavigationLink {
-                Text("Notifications")
+                NotificationsView()
             } label: {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 24))
